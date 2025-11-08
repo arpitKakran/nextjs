@@ -1,13 +1,14 @@
+// file: src/middleware.ts → rename to src/proxy.ts
+
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 export { default } from "next-auth/middleware"
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = await getToken({ req: request })
   const url = request.nextUrl
 
-  // If user is logged in and tries to access auth pages → send to dashboard
   if (
     token &&
     (url.pathname.startsWith('/sign-in') ||
@@ -17,12 +18,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // If not logged in and trying to access dashboard → send to sign-in
   if (!token && url.pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
-  // Otherwise, stay on the same page (no redirect)
   return NextResponse.next()
 }
 
